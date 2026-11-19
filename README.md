@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Drip: prototype fashion store
 
-## Getting Started
+A prototype e-commerce site for **Drip**, a fictional Irish high-street fashion
+brand. It works from homepage to checkout, but there is **no payment step**:
+nobody can pay or place a real order. All products, prices, reviews and
+sustainability figures are fictional sample data.
 
-First, run the development server:
+Built with Next.js (App Router), TypeScript, Tailwind CSS v4 and shadcn/ui.
+
+## Run it on your computer
+
+Needs Node.js 20.9 or newer.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Where to change things
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| What | File |
+| --- | --- |
+| All 48 products (names, prices, colours, sizes, fabric, sample figures) | `src/lib/products.ts` |
+| Pieces on the homepage clothing rail | `src/lib/rail.ts` |
+| Delivery prices, free-delivery threshold, returns days | `src/lib/store.ts` |
+| Take-back, repair and target figures (sample data) | `src/lib/impact.ts` |
+| Header menus and footer links | `src/lib/navigation.ts` |
+| Colours, fonts and spacing (design system) | `src/app/globals.css` |
 
-## Learn More
+## Photos (Unsplash)
 
-To learn more about Next.js, take a look at the following resources:
+Photos are hotlinked from Unsplash (never re-hosted). Their links and credits
+live in `src/lib/image-data.ts`, written by `scripts/fetch-images.ts`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To re-run the script you need a free Unsplash access key in `.env.local`
+(this file is git-ignored, so the key never goes to GitHub):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+UNSPLASH_ACCESS_KEY=your-access-key
+```
 
-## Deploy on Vercel
+```bash
+npm run images:fetch
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Demo keys allow 50 requests per hour. The script counts its requests, stops
+at the limit and saves its progress; run it again an hour later to finish.
+Hand-checked choices are listed in `PICKS` at the top of the script.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The live site does **not** need the key.
+
+## Checks
+
+```bash
+npm run lint
+npm run build
+```

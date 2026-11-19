@@ -1,26 +1,241 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Drip design system
+ * Near-monochrome, square corners, colour only where it means something.
+ * Light theme only. Contrast (WCAG 2.x):
+ *   ink #111418 on white 18.47 / on #F7F6F3 17.09
+ *   muted #5E6166 on white 6.22 / on #F7F6F3 5.75   (AA body text)
+ *   sale #A6192E on white 7.50, success #2F6B45 on white 6.34
+ *   white on moss #2F4A3A 9.72
+ *   input border #85878B on white 3.60 / on #F7F6F3 3.33 (AA non-text, 3:1)
+ */
 
 @theme inline {
+  /* shadcn semantic tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Drip-specific tokens */
+  --color-surface: var(--surface);
+  --color-sale: var(--sale);
+  --color-success: var(--success);
+  --color-moss: var(--moss);
+  --color-moss-foreground: var(--moss-foreground);
+
+  /* Fonts (set by next/font in layout.tsx) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-inter-tight), var(--font-inter), ui-sans-serif,
+    system-ui, sans-serif;
+
+  /* Corners: 2px max everywhere. Images and cards use rounded-none. */
+  --radius-xs: var(--radius);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+
+  /* No shadows */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --foreground: #111418;
+  --card: #ffffff;
+  --card-foreground: #111418;
+  --popover: #ffffff;
+  --popover-foreground: #111418;
+
+  --primary: #111418;
+  --primary-foreground: #ffffff;
+  --primary-hover: #2a2e33;
+
+  --secondary: #ffffff;
+  --secondary-foreground: #111418;
+
+  --muted: #f7f6f3;
+  --muted-foreground: #5e6166;
+  --accent: #f7f6f3;
+  --accent-foreground: #111418;
+
+  --destructive: #a6192e;
+  --border: #e3e1dc;
+  --input: #85878b;
+  --ring: #111418;
+
+  --surface: #f7f6f3;
+  --sale: #a6192e;
+  --success: #2f6b45;
+  /* Sustainability accent: ONLY the sustainability block, material badges
+     and the "How Drip makes clothes" section. */
+  --moss: #2f4a3a;
+  --moss-foreground: #ffffff;
+
+  --radius: 2px;
+}
+
+/*
+ * `@theme inline` above puts colours straight into utilities, so Tailwind does
+ * not output --color-* variables. The clothing rail (product-rail-gallery.tsx)
+ * reads them in inline styles, so define them here from Drip's tokens.
+ */
+:root {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+}
+
+/* Page container: ~1320px max, centred, 16/24/32px gutters (8px grid) */
+@utility page-container {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  @media (width >= 48rem) {
+    padding-inline: 24px;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 32px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Generous vertical rhythm between sections: 80px mobile, 112px desktop */
+@utility section-y {
+  padding-block: 80px;
+  @media (width >= 64rem) {
+    padding-block: 112px;
+  }
+}
+
+/* Uppercase label: badges and eyebrows only */
+@utility label-caps {
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Body copy inside content pages */
+@utility prose-drip {
+  & p,
+  & li {
+    max-width: 70ch;
+    color: var(--muted-foreground);
+  }
+  & ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  & li + li {
+    margin-top: 4px;
+  }
+  & a {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  & strong {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+}
+
+/* Readable paragraph measure */
+@utility measure {
+  max-width: 70ch;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Safety net: no page may scroll sideways. `clip` (not `hidden`) keeps the
+     sticky header working because it doesn't create a scroll container. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+  img,
+  svg,
+  video,
+  table {
+    max-width: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  h1,
+  h2 {
+    letter-spacing: -0.01em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Clear, visible focus for keyboard users */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .on-dark :focus-visible,
+  :is(.on-dark):focus-visible {
+    outline-color: #ffffff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

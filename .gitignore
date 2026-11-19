@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files: never commit secrets (UNSPLASH_ACCESS_KEY lives in .env.local)
 .env*
+.env.local
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +41,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Unsplash search results cached between script runs
+scripts/.unsplash-cache.json
+
+# Original rail component source (demo uses third-party brand images); not part of the site
+rail-component-source.txt
