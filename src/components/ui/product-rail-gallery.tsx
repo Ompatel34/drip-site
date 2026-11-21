@@ -16,6 +16,15 @@
  *  9. animate-in / fade-in classes come from tw-animate-css (installed).
  * Also: decorative background gradient removed, corners max 2px, and
  * small controls given 44-48px hit areas.
+ *
+ * Performance (phones were dropping to ~11-14 fps):
+ *  - Per-frame drape and shading are written straight to the element that
+ *    needs them, not as inherited CSS variables (those forced the browser to
+ *    restyle every garment drawing on every frame).
+ *  - Unchanged inline styles are not rewritten; drawings are memoised.
+ *  - "Lite" mode on touch / small screens: no blurred drop shadows, no noise,
+ *    cloth-ripple or fold-blur filters, off-screen carousel pieces hidden, and
+ *    no backdrop blur behind the detail view.
  */
 
 import * as React from "react";
@@ -290,6 +299,30 @@ function mix(color: string, amount: number) {
   return `color-mix(in oklab, ${color} ${keep}%, ${amount > 0 ? "white" : "black"})`;
 }
 
+/** Write an inline style only when it changes (skips needless style work each frame). */
+const lastStyle = new WeakMap<HTMLElement, Record<string, string>>();
+function setStyle(el: HTMLElement | null | undefined, prop: "transform" | "opacity" | "visibility", value: string) {
+  if (!el) return;
+  let cache = lastStyle.get(el);
+  if (!cache) { cache = {}; lastStyle.set(el, cache); }
+  if (cache[prop] === value) return;
+  cache[prop] = value;
+  el.style[prop] = value;
+}
+
+/** Phones and other touch devices get a lighter rendering of the rail. */
+function useLite() {
+  const [lite, setLite] = React.useState(false);
+  React.useEffect(() => {
+    const media = window.matchMedia("(pointer: coarse), (max-width: 767px)");
+    const update = () => setLite(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  return lite;
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
@@ -300,7 +333,7 @@ function lambert(angle: number) {
   return 0.66 + 0.34 * diffuse;
 }
 
-function Defs({ uid }: { uid: string }) {
+const Defs = React.memo(function Defs({ uid }: { uid: string }) {
   return (
     <svg aria-hidden="true" width="0" height="0" className="absolute" focusable="false">
       <defs>
@@ -377,7 +410,7 @@ function Defs({ uid }: { uid: string }) {
       </defs>
     </svg>
   );
-}
+});
 
 const HOOK = "M100,36 L100,-0.4 C100,-3.4 102.2,-4.2 103.9,-2.8 C104.9,-2 105.4,-1.2 105.6,-0.2";
 const HOOK_HI = "M99.5,30 L99.5,-0.2 C99.5,-2.4 101,-3.2 102.4,-2.6";
@@ -397,7 +430,7 @@ function Hook({ uid }: { uid: string }) {
   );
 }
 
-function Hanger({ uid, side, kind, material }: { uid: string; side: "front" | "back"; kind: GarmentKind | null; material: "wood" | "matte" | "none" }) {
+const Hanger = React.memo(function Hanger({ uid, side, kind, material }: { uid: string; side: "front" | "back"; kind: GarmentKind | null; material: "wood" | "matte" | "none" }) {
   const art = kind ? artFor(kind, side) : null;
   const bar = material === "wood" ? `url(#${uid}-wood)` : "currentColor";
   return (
@@ -416,9 +449,9 @@ function Hanger({ uid, side, kind, material }: { uid: string; side: "front" | "b
       )}
     </svg>
   );
-}
+});
 
-function SideHanger({ uid, material }: { uid: string; material: "wood" | "matte" | "none" }) {
+const SideHanger = React.memo(function SideHanger({ uid, material }: { uid: string; material: "wood" | "matte" | "none" }) {
   if (material === "none") return null;
   const bar = material === "wood" ? `url(#${uid}-wood)` : "currentColor";
   return (
@@ -428,9 +461,9 @@ function SideHanger({ uid, material }: { uid: string; material: "wood" | "matte"
       <Hook uid={uid} />
     </svg>
   );
-}
+});
 
-function Fabric({ uid, kind, side, color, trim }: { uid: string; kind: GarmentKind; side: "front" | "back"; color: string; trim: string }) {
+const Fabric = React.memo(function Fabric({ uid, kind, side, color, trim, lite = false }: { uid: string; kind: GarmentKind; side: "front" | "back"; color: string; trim: string; lite?: boolean }) {
   const art = artFor(kind, side);
   const clip = `url(#${uid}-clip-${kind}-${side})`;
   const knitted = kind === "knit";
@@ -443,14 +476,14 @@ function Fabric({ uid, kind, side, color, trim }: { uid: string; kind: GarmentKi
         {art.panels.map((panel) => <path key={panel.d} d={panel.d} fill={mix(color, panel.t)} />)}
         {art.ribs.map((d) => <path key={d} d={d} fill={mix(trim, 0)} />)}
         {art.ribs.map((d) => <path key={`${d}-rib`} d={d} fill={`url(#${uid}-rib)`} />)}
-        <g filter={`url(#${uid}-soft)`} fill="none" strokeLinecap="round">
+        <g filter={lite ? undefined : `url(#${uid}-soft)`} fill="none" strokeLinecap="round" opacity={lite ? 0.6 : undefined}>
           {art.folds.map((d) => <path key={d} d={d} stroke="black" strokeOpacity="0.22" strokeWidth="4" />)}
           {art.folds.map((d) => <path key={`${d}-hi`} d={d} stroke="white" strokeOpacity="0.1" strokeWidth="2" transform="translate(2.2 0)" />)}
           {art.sleeves.map((d) => <path key={`${d}-edge`} d={d} stroke="black" strokeOpacity="0.2" strokeWidth="3" />)}
         </g>
         <rect width={VB_W} height={VB_H} fill={`url(#${uid}-volume)`} />
         <rect width={VB_W} height={VB_H} fill={`url(#${uid}-drape)`} />
-        <rect width={VB_W} height={VB_H} filter={`url(#${uid}-grain)`} opacity="0.16" style={{ mixBlendMode: "multiply" }} />
+        {!lite && <rect width={VB_W} height={VB_H} filter={`url(#${uid}-grain)`} opacity="0.16" style={{ mixBlendMode: "multiply" }} />}
       </g>
       <g fill="none" strokeLinecap="round" strokeLinejoin="round">
         {art.seams.map((d) => <path key={d} d={d} stroke="black" strokeOpacity="0.22" strokeWidth="0.8" />)}
@@ -469,16 +502,16 @@ function Fabric({ uid, kind, side, color, trim }: { uid: string; kind: GarmentKi
       ))}
     </svg>
   );
-}
+});
 
-function SideArt({ uid, kind, color, trim }: { uid: string; kind: GarmentKind; color: string; trim: string }) {
+const SideArt = React.memo(function SideArt({ uid, kind, color, trim, lite = false }: { uid: string; kind: GarmentKind; color: string; trim: string; lite?: boolean }) {
   const { body, sleeve, hood, cuff } = sideShapes(kind);
   const knitted = kind === "knit";
-  const soft = `url(#${uid}-soft)`;
+  const soft = lite ? undefined : `url(#${uid}-soft)`;
   const hem = SIDE[kind].hem;
   return (
     <svg aria-hidden="true" viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="xMidYMin meet" className="absolute inset-0 size-full overflow-visible">
-      <g filter={`url(#${uid}-cloth)`}>
+      <g filter={lite ? undefined : `url(#${uid}-cloth)`}>
         {hood && <path d={hood} fill={mix(color, -0.14)} />}
         {hood && <path d={hood} fill="none" stroke="black" strokeOpacity="0.2" strokeWidth="1.2" />}
         <path d={body} fill={color} />
@@ -497,7 +530,7 @@ function SideArt({ uid, kind, color, trim }: { uid: string; kind: GarmentKind; c
           </g>
           <rect width={VB_W} height={VB_H} fill={`url(#${uid}-sidevol)`} />
           <rect width={VB_W} height={VB_H} fill={`url(#${uid}-drape)`} />
-          <rect width={VB_W} height={VB_H} filter={`url(#${uid}-grain)`} opacity="0.16" style={{ mixBlendMode: "multiply" }} />
+          {!lite && <rect width={VB_W} height={VB_H} filter={`url(#${uid}-grain)`} opacity="0.16" style={{ mixBlendMode: "multiply" }} />}
         </g>
         <path d={sleeve} fill={color} />
         <g clipPath={`url(#${uid}-ss-${kind})`}>
@@ -514,7 +547,7 @@ function SideArt({ uid, kind, color, trim }: { uid: string; kind: GarmentKind; c
           </g>
           <rect width={VB_W} height={VB_H} fill={`url(#${uid}-sidevol)`} />
           <rect width={VB_W} height={VB_H} fill={`url(#${uid}-drape)`} />
-          <rect width={VB_W} height={VB_H} filter={`url(#${uid}-grain)`} opacity="0.16" style={{ mixBlendMode: "multiply" }} />
+          {!lite && <rect width={VB_W} height={VB_H} filter={`url(#${uid}-grain)`} opacity="0.16" style={{ mixBlendMode: "multiply" }} />}
         </g>
         <path d={`M82,${cuff + 1} C92,${cuff + 6} 108,${cuff + 7} 118,${cuff + 4}`} fill="none" stroke={mix(color, 0.35)} strokeOpacity="0.45" strokeWidth="0.6" strokeDasharray="1.6 1.4" />
         <path d={`M86,${hem - 3} C92,${hem + 1} 109,${hem + 1} 115,${hem - 3}`} fill="none" stroke={mix(color, 0.35)} strokeOpacity="0.4" strokeWidth="0.6" strokeDasharray="1.6 1.4" />
@@ -524,7 +557,7 @@ function SideArt({ uid, kind, color, trim }: { uid: string; kind: GarmentKind; c
       <ellipse cx="100" cy="46" rx="10" ry="3.2" fill="none" stroke="black" strokeOpacity="0.2" strokeWidth="0.6" />
     </svg>
   );
-}
+});
 
 function Photo({ src, alt, full }: { src: string; alt: string; full: boolean }) {
   return <img src={src} alt={alt} draggable={false} className={`pointer-events-none absolute inset-x-0 bottom-0 size-auto w-full select-none object-contain object-top ${full ? "top-0 h-full" : "top-[8%] h-[92%]"}`} />;
@@ -580,6 +613,7 @@ export function ClothingRailHero({
   const [focusIndex, setFocusIndex] = React.useState(0);
   const [openIndex, setOpenIndex] = React.useState(null as number | null);
   const [reduced, setReduced] = React.useState(false);
+  const lite = useLite();
   const [playing, setPlaying] = React.useState(autoplay);
   const [lifted, setLifted] = React.useState(null as number | null);
   const returnFocus = React.useRef(null as number | null);
@@ -642,29 +676,32 @@ export function ClothingRailHero({
     if (!slot) return;
     const angle = s.turn[i] ?? REST;
     const swing = s.swing[i] ?? 0;
-    slot.style.transform = `translate3d(${((s.x[i] ?? 0) - w / 2).toFixed(2)}px,0,0)`;
-    const sw = swings.current[i];
-    if (sw) sw.style.transform = `rotate(${swing.toFixed(3)}deg)`;
+    const x = s.x[i] ?? 0;
+    setStyle(slot, "transform", `translate3d(${(x - w / 2).toFixed(1)}px,0,0)`);
+    // In the swipe carousel, pieces well past the screen edge are hidden so the
+    // browser doesn't keep compositing them. (Keyboard focus un-hides first.)
+    const { width, carousel } = live.current.size;
+    const far = carousel && (x + w * 1.5 < 0 || x - w * 1.5 > width);
+    if (far) slot.setAttribute("data-offstage", ""); else slot.removeAttribute("data-offstage");
+    if (far) return;
+    setStyle(swings.current[i], "transform", `rotate(${swing.toFixed(2)}deg)`);
     const e = clamp(1 - angle / REST, 0, 1);
     const tu = turns.current[i];
     const sd = sides.current[i];
     if (tu) {
-      tu.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${angle.toFixed(2)}deg)`;
-      tu.style.opacity = sd ? clamp((e - 0.44) / 0.12, 0, 1).toFixed(3) : "1";
+      setStyle(tu, "transform", `perspective(${PERSPECTIVE}px) rotateY(${angle.toFixed(1)}deg)`);
+      setStyle(tu, "opacity", sd ? clamp((e - 0.44) / 0.12, 0, 1).toFixed(2) : "1");
     }
     if (sd) {
-      sd.style.opacity = clamp((0.56 - e) / 0.12, 0, 1).toFixed(3);
-      sd.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${(Math.min(1, e * 2) * -84).toFixed(2)}deg)`;
+      setStyle(sd, "opacity", clamp((0.56 - e) / 0.12, 0, 1).toFixed(2));
+      setStyle(sd, "transform", `perspective(${PERSPECTIVE}px) rotateY(${(Math.min(1, e * 2) * -84).toFixed(1)}deg)`);
     }
+    // Drape lag and shading go straight onto their own elements (no inherited CSS variables).
     const lag = clamp(-(s.vswing[i] ?? 0) * 0.018, -5, 5);
-    const dr = drapes.current[i];
-    if (dr) dr.style.setProperty("--drape", `${lag.toFixed(3)}deg`);
-    const sh = shades.current[i];
-    if (sh) sh.style.setProperty("--shade", (1 - lambert(angle)).toFixed(3));
-    const shadow = shadows.current[i];
-    if (shadow) shadow.style.transform = `translate3d(${(w * 0.05).toFixed(1)}px, ${(h * 0.035).toFixed(1)}px, 0) scaleX(${Math.max(0.12, Math.abs(Math.cos((angle * Math.PI) / 180))).toFixed(3)})`;
-    const tag = tags.current[i];
-    if (tag) tag.style.transform = `rotate(${(-12 + (s.tag[i] ?? 0)).toFixed(2)}deg)`;
+    setStyle(drapes.current[i], "transform", `skewX(${lag.toFixed(2)}deg)`);
+    setStyle(shades.current[i], "opacity", (1 - lambert(angle)).toFixed(2));
+    setStyle(shadows.current[i], "transform", `translate3d(${(w * 0.05).toFixed(1)}px, ${(h * 0.035).toFixed(1)}px, 0) scaleX(${Math.max(0.12, Math.abs(Math.cos((angle * Math.PI) / 180))).toFixed(2)})`);
+    setStyle(tags.current[i], "transform", `rotate(${(-12 + (s.tag[i] ?? 0)).toFixed(1)}deg)`);
   }, []);
 
   const step = React.useCallback((now: number) => {
@@ -935,6 +972,7 @@ export function ClothingRailHero({
     const next = event.key === "Home" ? 0 : event.key === "End" ? count - 1 : clamp(from + (event.key === "ArrowRight" ? 1 : -1), 0, count - 1);
     setFocusIndex(next);
     choose(next);
+    slots.current[next]?.removeAttribute("data-offstage");
     slots.current[next]?.focus({ preventScroll: true });
   };
 
@@ -1006,33 +1044,39 @@ export function ClothingRailHero({
               aria-label={item.name}
               aria-describedby={`${uid}-caption`}
               aria-pressed={turned}
-              className="absolute left-0 cursor-pointer rounded-sm outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className="absolute left-0 cursor-pointer rounded-sm outline-none data-[offstage]:invisible focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
               style={{ top: railY - (HOOK_TOP / VB_H) * h, width: boxW, height: h, zIndex: turned ? 30 : 10 + i, visibility: lifted === i ? "hidden" : undefined, transform: `translate3d(${((sim.current.x[i] ?? 0) - boxW / 2).toFixed(2)}px,0,0)` }}
               onFocus={() => { setFocusIndex(i); if (pointer.current.id < 0) { stop(); choose(i); } }}
               onClick={(event) => { const pending = pendingOpen.current; pendingOpen.current = -1; if (event.detail === 0 || pending === i) open(i); }}
             >
               <span ref={(node) => { swings.current[i] = node; }} className="absolute inset-0" style={{ transformOrigin: `50% ${(HOOK_TOP / VB_H) * 100}%` }}>
-                <span aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ filter: `blur(${Math.max(3, h * 0.022).toFixed(1)}px)` }}>
-                  <span ref={(node) => { shadows.current[i] = node; }} className={`absolute block bg-black opacity-[0.16] dark:opacity-60 ${item.image ? photoBox : "inset-0"}`} style={{ WebkitMask: `${mask} top center / contain no-repeat`, mask: `${mask} top center / contain no-repeat` }} />
-                </span>
+                {!lite && (
+                  <span aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ filter: `blur(${Math.max(3, h * 0.022).toFixed(1)}px)` }}>
+                    <span ref={(node) => { shadows.current[i] = node; }} className={`absolute block bg-black opacity-[0.16] dark:opacity-60 ${item.image ? photoBox : "inset-0"}`} style={{ WebkitMask: `${mask} top center / contain no-repeat`, mask: `${mask} top center / contain no-repeat` }} />
+                  </span>
+                )}
                 {(item.sideImage || !item.image) && (
                   <span ref={(node) => { sides.current[i] = node; }} data-face="side" className="absolute inset-0" style={{ transform: `perspective(${PERSPECTIVE}px) rotateY(0deg)` }}>
                     <SideHanger uid={uid} material={hanger} />
-                    {item.sideImage ? <Photo src={item.sideImage} alt="" full={hanger === "none"} /> : <SideArt uid={uid} kind={kind} color={color} trim={trim} />}
+                    {item.sideImage ? <Photo src={item.sideImage} alt="" full={hanger === "none"} /> : <SideArt uid={uid} kind={kind} color={color} trim={trim} lite={lite} />}
                   </span>
                 )}
-                <span ref={(node) => { turns.current[i] = node; }} data-turn className="absolute inset-0 rounded-lg [transform-style:preserve-3d]" style={{ transform: `perspective(${PERSPECTIVE}px) rotateY(${REST}deg)`, opacity: item.image && !item.sideImage ? 1 : 0 }}>
-                  {(["front", "back"] as const).map((side) => (
-                    <span key={side} data-face={side} className="absolute inset-0 [backface-visibility:hidden]" style={{ transform: side === "back" ? "rotateY(180deg)" : undefined, ["--garment-color" as string]: color, ["--garment-under" as string]: mix(color, -0.42) }}>
-                      <Hanger uid={uid} side={side} kind={item.image ? null : kind} material={hanger} />
-                      <span ref={side === "front" ? (node) => { drapes.current[i] = node; } : undefined} data-drape className="absolute inset-0 origin-top [transform:skewX(var(--drape,0deg))]" style={side === "back" ? { transform: "skewX(calc(var(--drape, 0deg) * -1))" } : undefined}>
-                        {item.image
-                          ? <Photo src={(side === "back" ? item.backImage : undefined) ?? item.image} alt="" full={hanger === "none"} />
-                          : <Fabric uid={uid} kind={kind} side={side} color={color} trim={trim} />}
-                        <span ref={side === "front" ? (node) => { shades.current[i] = node; } : undefined} className={`pointer-events-none absolute bg-black ${item.image ? photoBox : "inset-0"}`} style={{ opacity: "var(--shade, 0.2)", WebkitMask: `${item.image ? `url("${(side === "back" ? item.backImage : undefined) ?? item.image}")` : silhouetteMask(kind, side)} top center / contain no-repeat`, mask: `${item.image ? `url("${(side === "back" ? item.backImage : undefined) ?? item.image}")` : silhouetteMask(kind, side)} top center / contain no-repeat` }} />
-                      </span>
+                {/* On the rail a piece only turns between side-on (-70°) and facing front (0°),
+                    so only the front face is drawn here; the back is shown in the detail view.
+                    No preserve-3d / backface-visibility needed, which keeps layer count low. */}
+                <span ref={(node) => { turns.current[i] = node; }} data-turn className="absolute inset-0" style={{ transform: `perspective(${PERSPECTIVE}px) rotateY(${REST}deg)`, opacity: item.image && !item.sideImage ? 1 : 0 }}>
+                  <span data-face="front" className="absolute inset-0" style={{ ["--garment-color" as string]: color, ["--garment-under" as string]: mix(color, -0.42) }}>
+                    <Hanger uid={uid} side="front" kind={item.image ? null : kind} material={hanger} />
+                    <span ref={(node) => { drapes.current[i] = node; }} data-drape className="absolute inset-0 origin-top">
+                      {item.image
+                        ? <Photo src={item.image} alt="" full={hanger === "none"} />
+                        : <Fabric uid={uid} kind={kind} side="front" color={color} trim={trim} lite={lite} />}
+                      {/* Turning-light shading: a masked layer per piece, skipped in lite mode */}
+                      {!lite && (
+                        <span ref={(node) => { shades.current[i] = node; }} className={`pointer-events-none absolute bg-black ${item.image ? photoBox : "inset-0"}`} style={{ opacity: 0.2, WebkitMask: `${item.image ? `url("${item.image}")` : silhouetteMask(kind, "front")} top center / contain no-repeat`, mask: `${item.image ? `url("${item.image}")` : silhouetteMask(kind, "front")} top center / contain no-repeat` }} />
+                      )}
                     </span>
-                  ))}
+                  </span>
                 </span>
                 {item.tag && (
                   <span ref={(node) => { tags.current[i] = node; }} aria-hidden="true" className="pointer-events-none absolute left-1/2 origin-top" style={{ top: (32 / VB_H) * h, transform: "rotate(-12deg)" }}>
@@ -1093,6 +1137,7 @@ export function ClothingRailHero({
           hanger={hanger}
           labels={labels}
           reduced={reduced}
+          lite={lite}
           source={() => turns.current[openIndex]?.getBoundingClientRect() ?? null}
           onLift={(lift) => setLifted(lift ? openIndex : null)}
           onClose={() => { const index = openIndex; returnFocus.current = index; close(); impulse(index, (index % 2 ? 1 : -1) * 44); }}
@@ -1102,7 +1147,7 @@ export function ClothingRailHero({
   );
 }
 
-function Detail({ uid, item, index, total, hanger, labels, reduced, source, onLift, onClose }: {
+function Detail({ uid, item, index, total, hanger, labels, reduced, lite = false, source, onLift, onClose }: {
   uid: string;
   item: RailGarment;
   index: number;
@@ -1110,6 +1155,7 @@ function Detail({ uid, item, index, total, hanger, labels, reduced, source, onLi
   hanger: "wood" | "matte" | "none";
   labels: ClothingRailHeroLabels;
   reduced: boolean;
+  lite?: boolean;
   source: () => DOMRect | null;
   onLift: (lifted: boolean) => void;
   onClose: () => void;
@@ -1242,7 +1288,7 @@ function Detail({ uid, item, index, total, hanger, labels, reduced, source, onLi
               <Hanger uid={uid} side={face} kind={item.image ? null : kind} material={hanger} />
               {item.image
                 ? <Photo src={(face === "back" ? item.backImage : undefined) ?? item.image} alt={face === "front" ? item.name : ""} full={hanger === "none"} />
-                : <Fabric uid={uid} kind={kind} side={face} color={color} trim={trim} />}
+                : <Fabric uid={uid} kind={kind} side={face} color={color} trim={trim} lite={lite} />}
             </div>
           ))}
         </div>
@@ -1252,7 +1298,7 @@ function Detail({ uid, item, index, total, hanger, labels, reduced, source, onLi
 
   return createPortal(
     <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-50 overflow-y-auto overscroll-contain text-foreground" onKeyDown={onKeyDown}>
-      <div aria-hidden="true" className={`fixed inset-0 bg-background/90 backdrop-blur-xl transition-opacity duration-300 motion-reduce:transition-none ${shown ? "opacity-100" : "opacity-0"}`} onClick={dismiss} />
+      <div aria-hidden="true" className={`fixed inset-0 ${lite ? "bg-background/97" : "bg-background/90 backdrop-blur-xl"} transition-opacity duration-300 motion-reduce:transition-none ${shown ? "opacity-100" : "opacity-0"}`} onClick={dismiss} />
       <button ref={closeRef} type="button" onClick={dismiss} className={`fixed right-4 top-4 z-20 inline-flex min-h-12 items-center gap-2 rounded-sm border border-border bg-background px-4 text-[15px] font-medium text-foreground outline-none transition-[opacity,color] duration-300 hover:border-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none ${shown ? "opacity-100" : "opacity-0"}`}>
         {labels.close}
         <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M3 3l10 10M13 3L3 13" /></svg>
