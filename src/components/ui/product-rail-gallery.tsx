@@ -1115,7 +1115,7 @@ export function ClothingRailHero({
               type="button"
               onClick={() => setPlaying((p) => !p)}
               aria-label={playing ? `${labels.pause} the rail` : `${labels.play} the rail`}
-              className="inline-flex h-12 items-center gap-2 rounded-sm border border-border bg-background px-4 text-[15px] font-medium text-foreground outline-none hover:border-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className="inline-flex h-12 min-w-[8.5rem] items-center justify-center gap-2 rounded-sm border border-foreground bg-background px-6 text-base font-semibold whitespace-nowrap text-foreground outline-none transition-colors select-none hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               {playing ? (
                 <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4" fill="currentColor"><rect x="3.5" y="2.5" width="3" height="11" /><rect x="9.5" y="2.5" width="3" height="11" /></svg>
