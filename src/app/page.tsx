@@ -29,9 +29,9 @@ export default function Home() {
         <ClothingRailHero
           items={railItems()}
           headingAs="h1"
-          eyebrow="New season"
-          heading="Made to be worn for years"
-          caption="Brush along the rail, then select a piece to take a closer look."
+          eyebrow="Traceable materials"
+          heading="Made from organic and recycled fibres"
+          caption="Every piece lists its fibre, recycled content and factory country. Brush the rail and select one to look closer."
           hanger="wood"
           autoplay
           interval={3500}
