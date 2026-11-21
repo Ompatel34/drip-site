@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { DripLogo } from "@/components/site/drip-logo"
 import { footerGroups } from "@/lib/navigation"
 import { PROTOTYPE_NOTICE } from "@/lib/store"
 
@@ -8,7 +9,7 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-surface">
       <div className="page-container py-16 lg:py-20">
         <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border pb-8">
-          <p className="font-heading text-2xl font-bold tracking-[-0.02em]">DRIP</p>
+          <DripLogo className="text-[36px]" />
           <p className="inline-flex items-center gap-2 text-[15px] font-medium">
             <span aria-hidden className="inline-block size-2 bg-foreground" />
             Ireland (€)

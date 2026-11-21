@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Inter, Inter_Tight } from "next/font/google"
+import { Anton, Inter, Inter_Tight } from "next/font/google"
 
 import { PromoStrip, PrototypeBanner } from "@/components/site/promo-strip"
 import { SiteFooter } from "@/components/site/site-footer"
@@ -13,6 +13,14 @@ import "./globals.css"
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+})
+
+/** Logo face only (heavy condensed, close to the Drip logo). latin-ext has the dotless i. */
+const anton = Anton({
+  variable: "--font-anton",
+  weight: "400",
+  subsets: ["latin", "latin-ext"],
   display: "swap",
 })
 
@@ -40,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en-IE" className={`${inter.variable} ${interTight.variable}`}>
+    <html lang="en-IE" className={`${inter.variable} ${interTight.variable} ${anton.variable}`}>
       <body>
         <a
           href="#main"

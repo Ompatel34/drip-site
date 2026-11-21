@@ -46,6 +46,8 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-inter-tight), var(--font-inter), ui-sans-serif,
     system-ui, sans-serif;
+  /* Logo only */
+  --font-logo: var(--font-anton), "Impact", "Arial Narrow", sans-serif;
 
   /* Corners: 2px max everywhere. Images and cards use rounded-none. */
   --radius-xs: var(--radius);

@@ -8,6 +8,7 @@ import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { DripLogo } from "@/components/site/drip-logo"
 import { useCart, useWishlist } from "@/components/site/store-provider"
 import { navMenus, type NavMenu } from "@/lib/navigation"
 
@@ -195,7 +196,7 @@ function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="gap-0 overflow-y-auto p-0">
         <div className="flex h-16 items-center border-b border-border px-6">
-          <SheetTitle className="font-heading text-xl font-bold tracking-tight">DRIP</SheetTitle>
+          <SheetTitle><DripLogo className="text-[30px]" label="Drip menu" /></SheetTitle>
         </div>
         <nav aria-label="Main">
           <ul>
@@ -255,8 +256,8 @@ export function SiteHeader() {
       <div className="page-container flex h-16 items-center gap-4 lg:h-[72px] lg:gap-8">
         <div className="flex items-center gap-1">
           <MobileNav />
-          <Link href="/" className="font-heading text-2xl leading-none font-bold tracking-[-0.02em]">
-            DRIP<span className="sr-only"> home</span>
+          <Link href="/" className="inline-flex items-center py-1" aria-label="Drip home">
+            <DripLogo className="text-[34px] lg:text-[38px]" label="Drip" />
           </Link>
         </div>
         <SearchField id={searchId} className="mx-auto hidden w-full max-w-[520px] md:block" />

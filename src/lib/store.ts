@@ -1,5 +1,5 @@
 /** Single source of truth for store-wide promises and delivery options. */
-export const FREE_DELIVERY_THRESHOLD = 60
+export const FREE_DELIVERY_THRESHOLD = 20
 export const RETURNS_DAYS = 30
 export const CURRENCY = "EUR"
 
@@ -18,6 +18,6 @@ export const deliveryCost = (subtotal: number, method: DeliveryMethod = "standar
 
 /** Every product price must sit inside this range. */
 export const PRICE_MIN = 15
-export const PRICE_MAX = 120
+export const PRICE_MAX = 35
 
 export const PROTOTYPE_NOTICE = "Prototype store - no real products or orders."
