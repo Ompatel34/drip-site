@@ -2,7 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 import { ContentPage } from "@/components/site/content-page"
-import { repairs, takeBack } from "@/lib/impact"
+import { BONUS_PCT, BUYBACK_MONTHS, RATES_SUMMARY } from "@/lib/buyback"
+import { repairs } from "@/lib/impact"
 import { formatPrice } from "@/lib/products"
 import { DELIVERY_OPTIONS, FREE_DELIVERY_THRESHOLD, RETURNS_DAYS } from "@/lib/store"
 
@@ -110,11 +111,25 @@ const sections: { id: string; title: string; items: QA[] }[] = [
         a: `Yes. Seams, zips and buttons are repaired free for ${repairs.freeRepairMonths} months after purchase.`,
       },
       {
+        q: "What is the Buy-back promise?",
+        a: (
+          <>
+            Within {BUYBACK_MONTHS / 12} years of buying, you can sell any Drip piece back to us. We pay a share of the price you paid:{" "}
+            {RATES_SUMMARY}. You get {BONUS_PCT} extra if you spend it on Pre-loved. Worn-out pieces earn no credit, but we still take them free and
+            recycle them. See <Link href="/pre-loved#how-it-works">how buy-back works</Link>.
+          </>
+        ),
+      },
+      {
+        q: "Do I need photos or an app to sell something back?",
+        a: "No. Bring it to any Drip store and staff will grade it at the till. Photos only help us give you an estimate online.",
+      },
+      {
         q: "What is Pre-loved?",
         a: (
           <>
-            Send back any Drip piece and get a €{takeBack.voucherEuro} voucher. We resell wearable pieces and recycle the rest. See{" "}
-            <Link href="/pre-loved">Pre-loved</Link>.
+            Pieces sold back to us that we have cleaned and checked. We resell them at a lower price and recycle what cannot be worn
+            again. See <Link href="/pre-loved">Pre-loved</Link>.
           </>
         ),
       },

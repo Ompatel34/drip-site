@@ -40,7 +40,12 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="page-container flex flex-col gap-2 py-6 text-sm text-muted-foreground sm:flex-row sm:justify-between">
           <p>© 2026 Drip. {PROTOTYPE_NOTICE}</p>
-          <p>Prices shown in euro and include VAT.</p>
+          <p className="flex flex-wrap gap-x-4">
+            <span>Prices shown in euro and include VAT.</span>
+            <Link href="/staff/grade-assist" className="underline underline-offset-4 hover:text-foreground">
+              Staff demo: Grade Assist
+            </Link>
+          </p>
         </div>
       </div>
     </footer>

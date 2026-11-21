@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Photo, PhotoCredit } from "@/components/site/photo"
+import { BUYBACK_MONTHS, MAX_RATE } from "@/lib/buyback"
 import { collection, factoryCountries, takeBack } from "@/lib/impact"
 import { formatPrice } from "@/lib/products"
 import { PRICE_MAX, PRICE_MIN } from "@/lib/store"
@@ -17,6 +18,7 @@ export default function AboutPage() {
     { k: "Products", v: `${collection.productCount} pieces for women, men and everyone` },
     { k: "Prices", v: `${formatPrice(PRICE_MIN)} to ${formatPrice(PRICE_MAX)}` },
     { k: "Made in", v: `${factoryCountries.length} countries, named on every product` },
+    { k: "Buy-back", v: `Up to ${MAX_RATE} of the price back within ${BUYBACK_MONTHS / 12} years` },
     { k: "Take-back", v: `${takeBack.itemsReturned.toLocaleString("en-IE")} items returned in ${takeBack.year}` },
   ]
 
@@ -65,8 +67,8 @@ export default function AboutPage() {
               was sewn and how to care for it.
             </p>
             <p className="measure text-base text-muted-foreground">
-              When you have finished with something, send it back. Wearable pieces go to Pre-loved;
-              the rest is recycled.
+              When you have finished with something, sell it back to us with the Buy-back promise.
+              Wearable pieces go to Pre-loved; the rest is recycled.
             </p>
             <dl className="mt-6 divide-y divide-border border-y border-border">
               {facts.map((f) => (

@@ -25,7 +25,7 @@ export default function ReturnsPage() {
       <ContentSection id="pre-loved" title="Pre-loved items">
         <p>
           Pre-loved pieces can be returned in the same way. Want to give us clothes you no longer wear? See{" "}
-          <Link href="/pre-loved">Pre-loved take-back</Link>.
+          <Link href="/pre-loved#how-it-works">the Buy-back promise</Link>.
         </p>
       </ContentSection>
     </ContentPage>

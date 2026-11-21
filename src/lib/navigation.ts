@@ -83,7 +83,8 @@ export const navMenus: NavMenu[] = [
       { label: "Last chance", href: "/pre-loved#last-chance" },
     ],
     categories: [
-      { label: "How take-back works", href: "/pre-loved#how-it-works" },
+      { label: "How buy-back works", href: "/pre-loved#how-it-works" },
+      { label: "My Drip Wardrobe", href: "/wardrobe" },
       { label: "Browse listings", href: "/pre-loved#listings" },
     ],
   },

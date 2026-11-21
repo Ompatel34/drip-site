@@ -59,7 +59,6 @@ export const takeBack = {
   resoldPercent: 61,
   recycledPercent: 33,
   respunPercent: 6,
-  voucherEuro: 5,
   hub: "Dublin 12",
 }
 

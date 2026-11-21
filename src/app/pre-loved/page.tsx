@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Photo } from "@/components/site/photo"
 import { SampleDataLabel } from "@/components/site/sustainability"
+import { BONUS_PCT, BUYBACK_MONTHS, buybackValues, RATES_SUMMARY } from "@/lib/buyback"
 import { nf, takeBack } from "@/lib/impact"
 import { formatPrice, getProduct, type Product } from "@/lib/products"
 
@@ -50,16 +51,16 @@ const groups: { id: string; title: string; intro: string; listings: Listing[] }[
 
 const steps = [
   {
-    title: "Send it back",
-    body: `Drop any Drip piece at a post office with our free label, or bring it to a store. Any condition is fine.`,
+    title: "Sell it back",
+    body: `Within ${BUYBACK_MONTHS / 12} years of buying, sell any Drip piece back. Get a quote in My Drip Wardrobe, or bring it to any store. No photos or app needed.`,
   },
   {
-    title: "Get a voucher",
-    body: `You get a €${takeBack.voucherEuro} voucher per item once it arrives at our hub in ${takeBack.hub}.`,
+    title: "We grade it",
+    body: `Staff check it at our hub in ${takeBack.hub} or at the till: like new, very good, good or worn out. If the grade changes from your estimate, we tell you why.`,
   },
   {
-    title: "We check and clean it",
-    body: "Each piece is inspected, washed or steamed, mended if needed and graded: like new, very good or good.",
+    title: "You get credit",
+    body: `We pay a share of the price you paid: ${RATES_SUMMARY}. Spend it on Pre-loved and you get ${BONUS_PCT} extra. Worn-out pieces earn no credit, but we still take them free.`,
   },
   {
     title: "Resold or recycled",
@@ -119,15 +120,16 @@ export default function PreLovedPage() {
               <li aria-current="page" className="text-foreground">Pre-loved</li>
             </ol>
           </nav>
-          <p className="label-caps mb-4 text-muted-foreground">Take-back and resale</p>
+          <p className="label-caps mb-4 text-muted-foreground">Buy-back and resale</p>
           <h1 className="text-[36px] leading-[1.08] lg:text-[48px]">Pre-loved</h1>
           <p className="measure mt-6 text-base text-muted-foreground lg:text-lg">
-            Send back Drip clothes you no longer wear. We check, clean and resell what can be worn
-            again, and recycle the rest. Listings on this page are placeholders in this prototype.
+            Every Drip piece comes with the Buy-back promise: sell it back to us within {BUYBACK_MONTHS / 12} years.
+            We clean and resell what can be worn again, and recycle the rest. Listings on this page are
+            placeholders in this prototype.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild>
-              <a href="#how-it-works">How take-back works</a>
+              <a href="#how-it-works">How buy-back works</a>
             </Button>
             <Button asChild variant="outline">
               <a href="#listings">Browse listings</a>
@@ -138,7 +140,7 @@ export default function PreLovedPage() {
 
       <section id="how-it-works" aria-labelledby="how-h" className="scroll-mt-32">
         <div className="page-container section-y">
-          <h2 id="how-h" className="text-[28px] lg:text-4xl">How take-back works</h2>
+          <h2 id="how-h" className="text-[28px] lg:text-4xl">How buy-back works</h2>
           <ol className="mt-10 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {steps.map((s, i) => (
               <li key={s.title} className="border-t-2 border-foreground pt-6">
@@ -148,6 +150,12 @@ export default function PreLovedPage() {
               </li>
             ))}
           </ol>
+          <p className="measure mt-10 text-base">
+            <span className="font-semibold">Example:</span> a {formatPrice(30)} jumper earns{" "}
+            {buybackValues(30).map((v) => formatPrice(v.value)).join(" / ")} by grade, or{" "}
+            {buybackValues(30).map((v) => formatPrice(v.preloved)).join(" / ")} if you spend it on Pre-loved.{" "}
+            <Link href="/wardrobe" className="underline underline-offset-4">See My Drip Wardrobe</Link>
+          </p>
 
           <div className="mt-12 grid grid-cols-1 gap-8 border border-border bg-surface p-6 lg:grid-cols-12 lg:p-8">
             <div className="lg:col-span-5">

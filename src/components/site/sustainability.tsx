@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { BONUS_PCT, BUYBACK_MONTHS, MAX_RATE } from "@/lib/buyback"
 import { collection, factoryCountries, nf, repairs, takeBack, targets } from "@/lib/impact"
 
 /*
@@ -110,7 +111,7 @@ export const commitments = () => [
     body: `Seams, zips and buttons are repaired free for ${repairs.freeRepairMonths} months after purchase. We made ${nf.format(repairs.repairsDone)} repairs in ${repairs.year}.`,
   },
   {
-    title: "Take-back and Pre-loved",
-    body: `Send back any Drip piece for a €${takeBack.voucherEuro} voucher. ${takeBack.resoldPercent}% of what came back in ${takeBack.year} was resold; the rest was recycled.`,
+    title: "Buy-back and Pre-loved",
+    body: `Sell any Drip piece back within ${BUYBACK_MONTHS / 12} years for up to ${MAX_RATE} of what you paid, ${BONUS_PCT} more on Pre-loved. ${takeBack.resoldPercent}% of what came back in ${takeBack.year} was resold; the rest was recycled.`,
   },
 ]

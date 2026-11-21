@@ -5,9 +5,11 @@ import Link from "next/link"
 import { CheckCircle2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { BuybackValuesLine } from "@/components/site/buyback"
 import { OrderTotals } from "@/components/site/order-totals"
 import { Photo } from "@/components/site/photo"
 import { useCart } from "@/components/site/store-provider"
+import { BUYBACK_MONTHS, PROMISE_LINE } from "@/lib/buyback"
 import { addWorkingDays, loadOrder, type Order } from "@/lib/checkout"
 import { formatPrice, getProduct } from "@/lib/products"
 import { DELIVERY_OPTIONS } from "@/lib/store"
@@ -88,6 +90,28 @@ export function Confirmation() {
           <p className="mt-3 text-[15px]">
             <span className="font-semibold">{DELIVERY_OPTIONS[order.method].label}</span>{" "}
             <span className="text-muted-foreground">({DELIVERY_OPTIONS[order.method].days})</span>
+          </p>
+        </section>
+
+        <section aria-labelledby="bb-h" className="mt-10 border border-border p-5">
+          <h3 id="bb-h" className="text-xl">Your buy-back promise</h3>
+          <p className="mt-1 text-[15px] text-muted-foreground">{PROMISE_LINE}</p>
+          <ul className="mt-4 divide-y divide-border border-y border-border">
+            {order.items.map((i) => (
+              <li key={`bb-${i.productId}|${i.colour}|${i.size}`} className="py-3">
+                <p className="text-[15px] font-medium">
+                  {i.name} <span className="font-normal text-muted-foreground">({i.colour}, {i.size}{i.qty > 1 ? `, ${i.qty} items, values each` : ""})</span>
+                </p>
+                <BuybackValuesLine price={i.unitPrice} className="mt-1" />
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-[15px]">
+            We&apos;ve added these to{" "}
+            <Link href="/wardrobe" className="font-medium underline underline-offset-4">
+              My Drip Wardrobe
+            </Link>
+            . You can sell them back for {BUYBACK_MONTHS / 12} years.
           </p>
         </section>
 

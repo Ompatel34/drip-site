@@ -8,6 +8,7 @@ import { BenefitsStrip } from "@/components/site/benefits-strip"
 import { OrderTotals } from "@/components/site/order-totals"
 import { Photo } from "@/components/site/photo"
 import { useCart, useWishlist } from "@/components/site/store-provider"
+import { maxBuyback } from "@/lib/buyback"
 import { cartDetails } from "@/lib/cart"
 import { formatPrice } from "@/lib/products"
 import { DELIVERY_OPTIONS } from "@/lib/store"
@@ -95,6 +96,10 @@ export function CartView() {
                             formatPrice(item.unitPrice)
                           )}{" "}
                           <span className="text-muted-foreground">each</span>
+                        </p>
+                        <p className="text-[15px] text-muted-foreground">
+                          Buy-back value up to {formatPrice(maxBuyback(item.unitPrice))}
+                          {item.qty > 1 && " each"}
                         </p>
                       </div>
                       <p className="text-base font-semibold">{formatPrice(item.lineTotal)}</p>

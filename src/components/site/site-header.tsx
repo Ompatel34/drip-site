@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDown, Heart, Menu, Search, ShoppingBag } from "lucide-react"
+import { ChevronDown, Heart, Menu, Search, ShoppingBag, UserRound } from "lucide-react"
 import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
@@ -60,6 +60,11 @@ function HeaderIcons() {
   const wishlist = useWishlist()
   return (
     <div className="-mr-3 flex items-center justify-end">
+      <Button asChild variant="ghost" size="icon">
+        <Link href="/wardrobe" aria-label="My Drip Wardrobe" title="My Drip Wardrobe">
+          <UserRound aria-hidden strokeWidth={1.75} />
+        </Link>
+      </Button>
       <Button asChild variant="ghost" size="icon" className="relative">
         <Link href="/wishlist">
           <Heart aria-hidden strokeWidth={1.75} />

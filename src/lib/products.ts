@@ -115,9 +115,9 @@ const C = {
 /* ------------------------------------------------------------------ */
 
 const TAKE_BACK =
-  "Send it back free with Drip Take-back: wearable pieces are cleaned and resold in Pre-loved, worn-out ones are shredded into insulation felt."
+  "Sell it back within 2 years with the Drip Buy-back promise: wearable pieces are cleaned and resold in Pre-loved, worn-out ones are taken free and shredded into insulation felt."
 const WOOL_BACK =
-  "Send it back free with Drip Take-back: wearable pieces go to Pre-loved, the rest is sorted by colour and re-spun into new yarn in Prato, Italy."
+  "Sell it back within 2 years with the Drip Buy-back promise: wearable pieces go to Pre-loved, the rest is taken free, sorted by colour and re-spun into new yarn in Prato, Italy."
 
 const FABRICS = {
   organicCotton: {
