@@ -37,7 +37,7 @@ export default function Home() {
           interval={3500}
           action={
             <Button asChild>
-              <Link href="/shop">Shop the edit</Link>
+              <Link href="/shop">Shop all</Link>
             </Button>
           }
         />

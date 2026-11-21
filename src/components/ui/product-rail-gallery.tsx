@@ -99,7 +99,7 @@ const GAP = 0.035;
 const MAX_H = 400;
 const MIN_WIDE_H = 200;
 const CAROUSEL_H = 340;
-const DEFAULT_LABELS: ClothingRailHeroLabels = { front: "Front", back: "Back", close: "Close", show: "Show", pause: "Pause", play: "Play", viewProduct: "View product" };
+const DEFAULT_LABELS: ClothingRailHeroLabels = { front: "Front", back: "Back", close: "Close", show: "Show", pause: "Pause rail", play: "Play rail", viewProduct: "View product" };
 
 type Tone = { d: string; t: number };
 type Art = {
@@ -1113,9 +1113,15 @@ export function ClothingRailHero({
           {autoplay && !reduced && (
             <button
               type="button"
-              onClick={() => setPlaying((p) => !p)}
-              aria-label={playing ? `${labels.pause} the rail` : `${labels.play} the rail`}
-              className="inline-flex h-12 min-w-[8.5rem] items-center justify-center gap-2 rounded-sm border border-foreground bg-background px-6 text-base font-semibold whitespace-nowrap text-foreground outline-none transition-colors select-none hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              onClick={() => {
+                if (!playing && count > 0) {
+                  /* Turn the next piece right away so the visitor sees what Play does. */
+                  const current = live.current.active;
+                  choose(current === null ? 0 : (current + 1) % count);
+                }
+                setPlaying((p) => !p);
+              }}
+              className="inline-flex h-12 min-w-[10.5rem] items-center justify-center gap-2 rounded-sm border border-foreground bg-background px-6 text-base font-semibold whitespace-nowrap text-foreground outline-none transition-colors select-none hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               {playing ? (
                 <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4" fill="currentColor"><rect x="3.5" y="2.5" width="3" height="11" /><rect x="9.5" y="2.5" width="3" height="11" /></svg>
