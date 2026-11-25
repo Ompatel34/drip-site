@@ -4,6 +4,7 @@ import { Anton, Inter, Inter_Tight } from "next/font/google"
 import { PromoStrip, PrototypeBanner } from "@/components/site/promo-strip"
 import { SiteFooter } from "@/components/site/site-footer"
 import { SiteHeader } from "@/components/site/site-header"
+import { AB_SCRIPT } from "@/components/site/buyback-ab"
 import { CookieNotice } from "@/components/site/cookie-notice"
 import { MiniCart } from "@/components/site/mini-cart"
 import { StoreProvider } from "@/components/site/store-provider"
@@ -48,7 +49,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en-IE" className={`${inter.variable} ${interTight.variable} ${anton.variable}`}>
+    <html lang="en-IE" className={`${inter.variable} ${interTight.variable} ${anton.variable}`} suppressHydrationWarning>
+      <head>
+        {/* A/B test switch: ?v=a hides the buy-back block (see buyback-ab.tsx). */}
+        <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
+      </head>
       <body>
         <a
           href="#main"

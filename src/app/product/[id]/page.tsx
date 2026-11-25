@@ -5,6 +5,7 @@ import { notFound } from "next/navigation"
 
 import { Badge } from "@/components/ui/badge"
 import { BuybackBlock } from "@/components/site/buyback"
+import { BuybackAB } from "@/components/site/buyback-ab"
 import { Photo, PhotoCredit } from "@/components/site/photo"
 import { Price, ProductBadges, ProductCard, ProductGrid } from "@/components/site/product-card"
 import {
@@ -108,7 +109,9 @@ export default async function ProductPage({ params }: Props) {
                 <RatingSummary product={product} />
               </div>
               <Price product={product} className="mt-2 text-lg font-semibold" />
-              <BuybackBlock price={currentPrice(product)} className="mt-4" />
+              <BuybackAB>
+                <BuybackBlock price={currentPrice(product)} className="mt-4" />
+              </BuybackAB>
               <Badge variant="material" className="mt-4">
                 {product.material}
               </Badge>

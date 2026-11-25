@@ -180,6 +180,11 @@
   max-width: 70ch;
 }
 
+/* A/B test: ?v=a hides the buy-back block (see components/site/buyback-ab.tsx). */
+html[data-ab="a"] .buyback-ab {
+  display: none;
+}
+
 @layer base {
   * {
     @apply border-border;
