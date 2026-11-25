@@ -3,6 +3,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import ClothingRailHero from "@/components/ui/product-rail-gallery"
 import { BenefitsStrip } from "@/components/site/benefits-strip"
+import { BuybackFeature } from "@/components/site/buyback"
+import { BuybackAB } from "@/components/site/buyback-ab"
 import { NewsletterForm } from "@/components/site/newsletter-form"
 import { Photo } from "@/components/site/photo"
 import { ProductGrid } from "@/components/site/product-card"
@@ -47,6 +49,14 @@ export default function Home() {
       <div className="page-container">
         <BenefitsStrip compact />
       </div>
+
+      {/* 2b. The X-factor: Buy-back promise, high on the page for first-time visitors.
+          Hidden in A/B version A (?v=a) like the product-page block. */}
+      <BuybackAB>
+        <div className="mt-12 lg:mt-16">
+          <BuybackFeature />
+        </div>
+      </BuybackAB>
 
       {/* 3. Featured categories */}
       <section aria-labelledby="categories" className="section-y">

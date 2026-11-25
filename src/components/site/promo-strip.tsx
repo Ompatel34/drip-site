@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { formatPrice } from "@/lib/products"
 import { FREE_DELIVERY_THRESHOLD, PROTOTYPE_NOTICE, RETURNS_DAYS } from "@/lib/store"
 
@@ -19,6 +21,13 @@ export function PromoStrip() {
         Free delivery over {formatPrice(FREE_DELIVERY_THRESHOLD)}
         <span aria-hidden className="mx-2">·</span>
         Free returns within {RETURNS_DAYS} days
+        {/* Hidden in A/B version A (?v=a), see buyback-ab.tsx */}
+        <span className="buyback-ab hidden sm:inline">
+          <span aria-hidden className="mx-2">·</span>
+          <Link href="/pre-loved#how-it-works" className="underline underline-offset-4">
+            We buy back what you buy
+          </Link>
+        </span>
       </p>
     </div>
   )
